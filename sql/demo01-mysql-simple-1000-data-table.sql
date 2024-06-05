@@ -1,3 +1,6 @@
+-- https://stackoverflow.com/questions/25098747/how-to-generate-1000000-rows-with-random-data
+-- well simple 1000 row example
+
 CREATE TABLE `data` 
 (
   `id`         bigint(20) NOT NULL      AUTO_INCREMENT,

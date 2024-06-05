@@ -37,6 +37,8 @@ DELIMITER ;
 CALL generate_data();
 ```
 
+NB Script here : [sql/demo01-mysql-simple-1000-data-table.sql](../sql/demo01-mysql-simple-1000-data-table.sql)
+
 next to demo the secondary index affect add a secondary index on column id2 
 
 
