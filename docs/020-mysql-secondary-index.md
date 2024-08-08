@@ -11,6 +11,7 @@ use test;
 CREATE TABLE `data` 
 (
   `id`         bigint(20) NOT NULL      AUTO_INCREMENT,
+  `id2`        bigint(20)               DEFAULT NULL,
   `datetime`   timestamp  NULL          DEFAULT CURRENT_TIMESTAMP,
   `channel`    int(11)                  DEFAULT NULL,
   `value`      float                    DEFAULT NULL,
