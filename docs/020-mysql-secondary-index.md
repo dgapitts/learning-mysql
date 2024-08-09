@@ -111,4 +111,126 @@ mysql> explain analyze select * from data where id > 800;
 1 row in set (0.00 sec)
 ```
 
+### Retesting with 'explain FORMAT=JSON'
+
+I did also try using 
+
+```
+explain FORMAT=JSON select * from data where id > 800;
+explain FORMAT=JSON select * from data where id2 > 800;
+```
+
+Using the id (i.e. the PK)
+
+> Primary Key Index (Clustered Index): In InnoDB, the table data is stored in a B-tree structure that is organized based on the primary key. This is called the clustered index. Every row in the table is physically stored according to the order of the primary key.
+
+so  we have direct access to the "index orientated table" and lower "read_cost": "20.35"
+
+```
+        "read_cost": "20.35",
+        "eval_cost": "20.00",
+        "prefix_cost": "40.35",
+        "data_read_per_join": "6K"
+      },
+```
+
+
+vs the almost identical unique index `id2`  we see x3.5 times higher read cost
+```
+      "cost_info": {
+        "read_cost": "70.26",
+        "eval_cost": "20.00",
+        "prefix_cost": "90.26",
+        "data_read_per_join": "6K"
+      },
+```
+
+> Secondary indexes in InnoDB are also B-trees, but they do not store the actual row data. Instead, they store the indexed column(s) and a reference to the corresponding primary key value.
+
+Here is the full output
+```
+mysql> explain FORMAT=JSON select * from data where id2 > 800;
+
+ {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "90.26"
+    },
+    "table": {
+      "table_name": "data",
+      "access_type": "range",
+      "possible_keys": [
+        "data_idx_uniq",
+        "data_idx"
+      ],
+      "key": "data_idx_uniq",
+      "used_key_parts": [
+        "id2"
+      ],
+      "key_length": "9",
+      "rows_examined_per_scan": 200,
+      "rows_produced_per_join": 200,
+      "filtered": "100.00",
+      "index_condition": "(`test`.`data`.`id2` > 800)",
+      "cost_info": {
+        "read_cost": "70.26",
+        "eval_cost": "20.00",
+        "prefix_cost": "90.26",
+        "data_read_per_join": "6K"
+      },
+      "used_columns": [
+        "id",
+        "id2",
+        "datetime",
+        "channel",
+        "value"
+      ]
+    }
+  }
+}
+```
+
+and
+```
+mysql> explain FORMAT=JSON select * from data where id > 800;
+
+ {
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "40.35"
+    },
+    "table": {
+      "table_name": "data",
+      "access_type": "range",
+      "possible_keys": [
+        "PRIMARY"
+      ],
+      "key": "PRIMARY",
+      "used_key_parts": [
+        "id"
+      ],
+      "key_length": "8",
+      "rows_examined_per_scan": 200,
+      "rows_produced_per_join": 200,
+      "filtered": "100.00",
+      "cost_info": {
+        "read_cost": "20.35",
+        "eval_cost": "20.00",
+        "prefix_cost": "40.35",
+        "data_read_per_join": "6K"
+      },
+      "used_columns": [
+        "id",
+        "id2",
+        "datetime",
+        "channel",
+        "value"
+      ],
+      "attached_condition": "(`test`.`data`.`id` > 800)"
+    }
+  }
+}
+```
 
